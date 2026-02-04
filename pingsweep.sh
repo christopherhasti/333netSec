@@ -31,20 +31,30 @@ perform_sweep() {
     # Empty the log file at start of new sweep
     > "$logfile"
 
+    hits=0
+    scanned=0
     for q in {1..200}
     do
         curr="$base$q"
         
         # -c 1: Count 1 packet
         # -W 1: Wait max 1 second for response
+        scanned=$((scanned + 1))
         if ping -c 1 -W 1 "$curr" &> /dev/null; then
             echo "$curr is UP"
             echo "$curr" >> "$logfile"
+            hits=$((hits + 1))
         else
             echo "$curr is DOWN"
         fi
     done
-    
+
+    echo ""
+    echo "Found $hits hosts UP."
+    echo "Scanned $scanned nodes." 
+    unresponsive=$((scanned - hits))
+    echo "Unresponsive machines: $unresponsive"
+    echo ""
     echo "Sweep complete. Results saved to $logfile"
     echo ""
 }
